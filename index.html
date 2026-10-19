@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102544">
+<title>SmartManage MW</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#172033}
+header{background:#102544;color:white;padding:20px 15px;text-align:center}
+header h1{margin:0;font-size:25px}
+header p{margin:7px 0 0;color:#dce8ff}
+nav{display:flex;overflow-x:auto;background:#18365e;padding:8px;gap:7px}
+nav button{border:0;border-radius:8px;padding:12px;background:#fff;color:#18365e;font-weight:bold;white-space:nowrap}
+main{max-width:900px;margin:auto;padding:12px}
+.card{background:white;padding:15px;margin:12px 0;border-radius:12px;box-shadow:0 2px 7px #00000010}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat{background:#e8f0ff;padding:13px;border-radius:10px;overflow-wrap:anywhere}
+.stat b{display:block;font-size:19px;margin-top:8px}
+h2{font-size:20px}
+input,select,textarea{width:100%;padding:12px;margin:6px 0;border:1px solid #ccd5e1;border-radius:8px;background:white;font-size:15px}
+.btn{width:100%;padding:13px;border:0;border-radius:8px;background:#102544;color:white;font-weight:bold;margin-top:8px}
+.green{background:#138044}
+.red{background:#b42323}
+.item{border-bottom:1px solid #e5e7eb;padding:12px 0;overflow-wrap:anywhere}
+.item button{padding:7px;margin-top:5px}
+.small{font-size:13px;color:#64748b}
+.section{display:none}
+.section.active{display:block}
+.tag{display:inline-block;background:#e5edff;border-radius:6px;padding:4px 7px;font-size:12px}
+@media(min-width:600px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+</head>
+
+<body>
+<header>
+<h1>SmartManage MW 🇲🇼</h1>
+<p>One simple management system for Malawi</p>
+</header>
+
+<nav>
+<button onclick="openTab('dashboard')">Dashboard</button>
+<button onclick="openTab('sales')">Sales</button>
+<button onclick="openTab('expenses')">Expenses</button>
+<button onclick="openTab('stock')">Stock</button>
+<button onclick="openTab('customers')">Customers</button>
+<button onclick="openTab('schools')">Schools</button>
+<button onclick="openTab('reports')">Reports</button>
+<button onclick="openTab('backup')">Backup</button>
+</nav>
+
+<main>
+<div class="card">
+<label><b>Business / School name</b></label>
+<input id="businessName" placeholder="Enter your business or school name">
+<button class="btn" onclick="saveBusiness()">Save name</button>
+<p class="small">Current profile: <b id="businessLabel">My Business</b></p>
+</div>
+
+<section id="dashboard" class="section active">
+<div class="card">
+<h2>📊 Dashboard</h2>
+<div class="stats">
+<div class="stat">Total sales<b id="dSales">MK 0</b></div>
+<div class="stat">Expenses<b id="dExpenses">MK 0</b></div>
+<div class="stat">Balance before other costs<b id="dBalance">MK 0</b></div>
+<div class="stat">Outstanding debts<b id="dDebts">MK 0</b></div>
+<div class="stat">Products in stock<b id="dStock">0</b></div>
+<div class="stat">Transactions<b id="dCount">0</b></div>
+</div>
+</div>
+<div class="card">
+<h2>Recent activity</h2>
+<div id="recent"></div>
+</div>
+</section>
+
+<section id="sales" class="section">
+<div class="card">
+<h2>🛒 Record a sale or payment</h2>
+<form onsubmit="addRecord(event,'sale')">
+<input id="saleName" placeholder="Product, service, fee or customer" required>
+<input id="saleAmount" type="number" min="0.01" step="0.01" placeholder="Amount in MWK" required>
+<select id="saleMethod">
+<option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank transfer</option><option>Other</option><option>Credit / Unpaid</option>
+</select>
+<input id="saleRef" placeholder="Payment reference (optional)">
+<input id="saleDate" type="date" required>
+<button class="btn green">Save sale / payment</button>
+</form>
+</div>
+<div class="card"><h2>Sales history</h2><div id="salesList"></div></div>
+</section>
+
+<section id="expenses" class="section">
+<div class="card">
+<h2>🧾 Record an expense</h2>
+<form onsubmit="addRecord(event,'expense')">
+<input id="expenseName" placeholder="Expense description" required>
+<input id="expenseAmount" type="number" min="0.01" step="0.01" placeholder="Amount in MWK" required>
+<select id="expenseMethod">
+<option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank transfer</option><option>Other</option>
+</select>
+<input id="expenseDate" type="date" required>
+<button class="btn green">Save expense</button>
+</form>
+</div>
+<div class="card"><h2>Expense history</h2><div id="expensesList"></div></div>
+</section>
+
+<section id="stock" class="section">
+<div class="card">
+<h2>📦 Stock management</h2>
+<form onsubmit="addStock(event)">
+<input id="productName" placeholder="Product name" required>
+<input id="productQty" type="number" min="0" step="1" placeholder="Quantity" required>
+<input id="productPrice" type="number" min="0" step="0.01" placeholder="Selling price per item (MWK)" required>
+<button class="btn green">Add product</button>
+</form>
+</div>
+<div class="card"><h2>Stock list</h2><div id="stockList"></div></div>
+</section>
+
+<section id="customers" class="section">
+<div class="card">
+<h2>👥 Customers and debts</h2>
+<form onsubmit="addCustomer(event)">
+<input id="customerName" placeholder="Customer name" required>
+<input id="customerPhone" placeholder="Phone number (optional)">
+<input id="customerDebt" type="number" min="0" step="0.01" placeholder="Outstanding debt in MWK" value="0" required>
+<button class="btn green">Save customer</button>
+</form>
+</div>
+<div class="card"><h2>Customer records</h2><div id="customersList"></div></div>
+</section>
+
+<section id="schools" class="section">
+<div class="card">
+<h2>🏫 Student and school fees</h2>
+<form onsubmit="addStudent(event)">
+<input id="studentName" placeholder="Student name" required>
+<input id="studentClass" placeholder="Class / Form" required>
+<input id="studentFee" type="number" min="0" step="0.01" placeholder="Total fees due (MWK)" required>
+<input id="studentPaid" type="number" min="0" step="0.01" placeholder="Fees paid so far (MWK)" value="0" required>
+<select id="schoolMethod">
+<option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank transfer</option><option>Other</option>
+</select>
+<input id="schoolDate" type="date" required>
+<button class="btn green">Save student record</button>
+</form>
+<p class="small">Record only payments actually received. Keep payment receipts for verification.</p>
+</div>
+<div class="card"><h2>Students and fee balances</h2><div id="studentsList"></div></div>
+</section>
+
+<section id="reports" class="section">
+<div class="card">
+<h2>📈 Reports</h2>
+<p>Total recorded sales: <b id="rSales">MK 0</b></p>
+<p>Total recorded expenses: <b id="rExpenses">MK 0</b></p>
+<p>Difference: <b id="rProfit">MK 0</b></p>
+<p>Cash received: <b id="rCash">MK 0</b></p>
+<p>Airtel Money received: <b id="rAirtel">MK 0</b></p>
+<p>TNM Mpamba received: <b id="rMpamba">MK 0</b></p>
+<p>Bank transfers received: <b id="rBank">MK 0</b></p>
+<p>Credit / unpaid sales: <b id="rCredit">MK 0</b></p>
+<p class="small">The difference is sales minus expenses, not a complete accounting profit calculation.</p>
+</div>
+</section>
+
+<section id="backup" class="section">
+<div class="card">
+<h2>💾 Backup and restore</h2>
+<p>Export your records regularly and keep the backup somewhere safe.</p>
+<button class="btn" onclick="exportData()">Download backup</button>
+<input type="file" id="backupFile" accept=".json,application/json">
+<button class="btn" onclick="importData()">Restore from backup</button>
+<button class="btn red" onclick="clearData()">Delete all saved records</button>
+<p class="small">Restoring a backup replaces the records currently stored in this browser.</p>
+</div>
+<div class="card">
+<h2>Important information</h2>
+<p class="small">This first version saves data on this device and browser only. It does not yet provide secure login, shared accounts, online syncing, or direct mobile-money transactions. Selecting Airtel Money or TNM Mpamba records the method; it does not send money.</p>
+</div>
+</section>
+</main>
+
+<script>
+const KEY='smartmanage_mw_v1';
+let data={business:'My Business',sales:[],expenses:[],stock:[],customers:[],students:[]};
+
+function load(){
+ try{
+  const saved=localStorage.getItem(KEY);
+  if(saved){const parsed=JSON.parse(saved);if(parsed&&typeof parsed==='object')data={...data,...parsed};}
+ }catch(e){alert('Saved data could not be read. Please check your backup.');}
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function money(n){return 'MK '+Number(n||0).toLocaleString('en-US',{maximumFractionDigits:2});}
+function val(id){return document.getElementById(id).value.trim();}
+function amount(id){return Number(document.getElementById(id).value);}
+function today(){return new Date().toISOString().slice(0,10);}
+function safe(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function saveBusiness(){
+ data.business=val('businessName')||'My Business';save();
+ alert('Business name saved on this device.');
+}
+function openTab(id){
+ document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ window.scrollTo(0,0);
+}
+function addRecord(e,type){
+ e.preventDefault();
+ const isSale=type==='sale';
+ const name=val(isSale?'saleName':'expenseName');
+ const amt=amount(isSale?'saleAmount':'expenseAmount');
+ if(!name||!Number.isFinite(amt)||amt<=0)return alert('Enter a description and a valid amount.');
+ const method=val(isSale?'saleMethod':'expenseMethod');
+ const date=val(isSale?'saleDate':'expenseDate')||today();
+ const ref=isSale?val('saleRef'):'';
+ data[type==='sale'?'sales':'expenses'].push({id:Date.now()+Math.random(),name,amount:amt,method,date,ref});
+ e.target.reset();
+ document.getElementById(isSale?'saleDate':'expenseDate').value=today();
+ save();alert('Record saved.');
+}
+function addStock(e){
+ e.preventDefault();
+ const name=val('productName'),qty=amount('productQty'),price=amount('productPrice');
+ if(!name||qty<0||price<0)return alert('Enter valid product details.');
+ data.stock.push({id:Date.now()+Math.random(),name,qty,price});
+ e.target.reset();save();alert('Product added.');
+}
+function addCustomer(e){
+ e.preventDefault();
+ const name=val('customerName'),phone=val('customerPhone'),debt=amount('customerDebt');
+ if(!name||debt<0)return alert('Enter valid customer details.');
+ data.customers.push({id:Date.now()+Math.random(),name,phone,debt});
+ e.target.reset();document.getElementById('customerDebt').value='0';
+ save();alert('Customer saved.');
+}
+function addStudent(e){
+ e.preventDefault();
+ const name=val('studentName'),cls=val('studentClass'),fee=amount('studentFee'),paid=amount('studentPaid');
+ if(!name||!cls||fee<0||paid<0||paid>fee)return alert('Check the student details. Amount paid cannot exceed fees due.');
+ data.students.push({id:Date.now()+Math.random(),name,cls,fee,paid,method:val('schoolMethod'),date:val('schoolDate')||today()});
+ e.target.reset();document.getElementById('studentPaid').value='0';document.getElementById('schoolDate').value=today();
+ save();alert('Student record saved.');
+}
+function removeItem(group,id){
+ if(!confirm('Delete this record?'))return;
+ data[group]=data[group].filter(x=>String(x.id)!==String(id));save();
+}
+function listItems(id,items,group,make){
+ const el=document.getElementById(id);
+ el.innerHTML=items.length?items.slice().reverse().map(x=>`<div class="item">${make(x)}<br><button onclick="removeItem('${group}','${x.id}')">Delete</button></div>`).join(''):'No records yet.';
+}
+function render(){
+ document.getElementById('businessLabel').textContent=data.business||'My Business';
+ document.getElementById('businessName').value=data.business||'';
+ const sales=data.sales.reduce((s,x)=>s+Number(x.amount||0),0);
+ const expenses=data.expenses.reduce((s,x)=>s+Number(x.amount||

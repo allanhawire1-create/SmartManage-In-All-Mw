@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartManage Global PRO</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui;background:#f1f5f9;color:#172033}
+header{background:linear-gradient(135deg,#102544,#1e4a8a);color:#fff;padding:20px;text-align:center}
+nav{display:flex;overflow-x:auto;background:#18365e;padding:8px;gap:5px;position:sticky;top:0;z-index:10}
+nav button{border:0;border-radius:20px;padding:9px 12px;background:#fff;font-weight:700;white-space:nowrap;font-size:11px}
+nav button.active{background:#22c55e;color:#fff}
+main{max-width:1100px;margin:auto;padding:10px}
+.card{background:#fff;padding:14px;margin:10px 0;border-radius:14px;box-shadow:0 2px 8px #0001}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stat{background:#eef4ff;padding:11px;border-radius:12px;border-left:4px solid #102544}
+.stat b{display:block;font-size:15px}
+.btn{width:100%;padding:11px;border:0;border-radius:10px;background:#102544;color:#fff;font-weight:700;margin-top:6px}
+.btn.green{background:#15803d}.btn.light{background:#e2e8f0;color:#102544}.btn.red{background:#b42323}
+.item{padding:8px 0;border-bottom:1px solid #eef2f7;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.small{font-size:11px;color:#64748b}.section{display:none}.section.active{display:block}
+input,select{width:100%;padding:11px;margin:4px 0;border:1px solid #cbd5e1;border-radius:10px}
+.row{display:flex;gap:6px}.row>*{flex:1;min-width:80px}
+.receipt{background:#fff;border:1px dashed #102544;padding:12px;white-space:pre-wrap;font-family:monospace;font-size:12px}
+@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}}
+</style></head><body>
+<header><h1>SmartManage GLOBAL PRO 🌍</h1><p>For Shops, Schools, Supermarkets - Worldwide Payment Methods</p></header>
+<nav>
+<button onclick="openTab('dashboard')" id="b-dashboard" class="active">Dashboard</button>
+<button onclick="openTab('sales')" id="b-sales">Sales</button>
+<button onclick="openTab('stock')" id="b-stock">Stock</button>
+<button onclick="openTab('expenses')" id="b-expenses">Expenses</button>
+<button onclick="openTab('customers')" id="b-customers">Customers</button>
+<button onclick="openTab('employees')" id="b-employees">Staff Pay</button>
+<button onclick="openTab('schools')" id="b-schools">Schools</button>
+<button onclick="openTab('reports')" id="b-reports">Reports</button>
+<button onclick="openTab('settings')" id="b-settings">Settings</button>
+</nav>
+<main>
+<section id="dashboard" class="section active">
+<div class="card"><div class="row"><input id="businessName" placeholder="Your Business Name"><select id="businessType"><option>General Shop</option><option>Supermarket</option><option>School</option><option>Hardware</option><option>Grocery</option><option>Other Business</option></select></div><button class="btn" onclick="saveBusiness()">Save Profile</button><p class="small">Business: <b id="businessLabel">My Business</b></p></div>
+<div class="card"><h2>Dashboard</h2><div class="stats">
+<div class="stat">Sales<b id="dSales">0</b></div><div class="stat">Expenses<b id="dExpenses">0</b></div><div class="stat">Profit<b id="dProfit">0</b></div><div class="stat">Debts<b id="dDebts">0</b></div>
+<div class="stat">School Fees<b id="dSchool">0</b></div><div class="stat">Stock<b id="dStock">0</b></div><div class="stat">Low Stock<b id="dLow">0</b></div><div class="stat">Staff Unpaid<b id="dStaff">0</b></div>
+</div></div>
+<div class="card"><h2>Alerts</h2><div id="alerts"></div></div>
+</section>
+
+<section id="sales" class="section">
+<div class="card"><h2>🛒 Sales - All Payment Methods</h2><form onsubmit="addSale(event)">
+<input id="saleName" required placeholder="Product"><div class="row"><input id="saleQty" type="number" value="1"><input id="saleAmount" type="number" step="0.01" required placeholder="Price"></div>
+<select id="saleMethod">
+<option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>MTN Mobile Money</option><option>M-Pesa</option><option>PayPal</option><option>Bank Transfer</option><option>Other</option><option>Credit / Unpaid</option>
+</select>
+<div class="row"><input id="saleRef" placeholder="Transaction ID / Ref"><input id="saleDate" type="date" required></div>
+<input id="saleCustomer" placeholder="Customer"><button class="btn green">Save Sale</button></form></div>
+<div class="card"><h2>Sales</h2><div id="salesList"></div></div>
+<div class="card"><h2>Last Invoice</h2><div id="invoiceArea" class="receipt">No invoice</div><button class="btn light" onclick="shareW('invoiceArea')">Share WhatsApp</button></div>
+</section>
+
+<section id="stock" class="section">
+<div class="card"><h2>📋 Stock + Profit</h2><form onsubmit="addStock(event)"><input id="productName" required placeholder="Product"><div class="row"><input id="productQty" type="number" required placeholder="Qty"><input id="productPrice" type="number" step="0.01" required placeholder="Sell Price"><input id="productCost" type="number" step="0.01" placeholder="Cost Price"></div><button class="btn green">Add Stock</button></form></div>
+<div class="card"><h2>Stock</h2><div id="stockList"></div></div>
+</section>
+
+<section id="expenses" class="section">
+<div class="card"><h2>🧾 Expenses - All Payment Methods</h2><form onsubmit="addExpense(event)"><input id="expName" required placeholder="Expense"><select id="expCat"><option>General</option><option>Rent</option><option>Transport</option><option>Salaries</option><option>Electricity/Water</option><option>Stock</option><option>Other</option></select><div class="row"><input id="expAmount" type="number" step="0.01" required><select id="expMethod"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>MTN Mobile Money</option><option>M-Pesa</option><option>PayPal</option><option>Bank Transfer</option><option>Other</option></select></div><input id="expDate" type="date" required><button class="btn green">Save</button></form></div>
+<div class="card"><h2>Expenses</h2><div id="expensesList"></div></div>
+</section>
+
+<section id="customers" class="section">
+<div class="card"><h2>👥 Customers</h2><form onsubmit="addCustomer(event)"><input id="cusName" required placeholder="Name"><input id="cusPhone" placeholder="Phone"><input id="cusDebt" type="number" value="0" placeholder="Debt"><button class="btn green">Save</button></form></div>
+<div class="card"><h2>Customers</h2><div id="customersList"></div></div>
+<div class="card"><h2>Repayment</h2><form onsubmit="addRepay(event)"><select id="repayCustomer"></select><div class="row"><input id="repayAmount" type="number" step="0.01" required><select id="repayMethod"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>MTN Mobile Money</option><option>M-Pesa</option><option>PayPal</option><option>Bank Transfer</option><option>Other</option></select></div><input id="repayDate" type="date" required><button class="btn green">Record</button></form></div>
+</section>
+
+<section id="employees" class="section">
+<div class="card"><h2>👷 Staff List</h2><form onsubmit="addEmp(event)"><input id="empName" required placeholder="Staff Name"><div class="row"><input id="empRole" placeholder="Role"><input id="empSalary" type="number" step="0.01" placeholder="Salary"><input id="empPhone" placeholder="Phone"></div><button class="btn green">Add Staff</button></form></div>
+<div class="card"><h2>Staff</h2><div id="employeesList"></div></div>
+<div class="card"><h2>💸 PAY WORKERS - All Payment Methods</h2><form onsubmit="paySal(event)">
+<select id="payEmployee"></select>
+<div class="row"><input id="payAmount" type="number" step="0.01" required placeholder="Amount"><select id="payMethod">
+<option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>MTN Mobile Money</option><option>M-Pesa</option><option>PayPal</option><option>Bank Transfer</option><option>Other</option>
+</select></div>
+<div class="row"><input id="payRef" placeholder="Transaction ID / Ref"><input id="payDate" type="date" required></div>
+<button class="btn green">Pay Salary via Selected Method</button></form></div>
+<div class="card"><h2>Salary History</h2><div id="salaryList"></div></div>
+</section>
+
+<section id="schools" class="section">
+<div class="card"><h2>🏫 School Fees - All Payment Methods</h2><form onsubmit="addStudent(event)"><input id="stuName" required placeholder="Student"><div class="row"><input id="stuClass" required placeholder="Class"><input id="stuFee" type="number" required placeholder="Due"><input id="stuPaid" type="number" value="0" placeholder="Paid"></div><div class="row"><select id="stuMethod"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>MTN Mobile Money</option><option>M-Pesa</option><option>PayPal</option><option>Bank Transfer</option><option>Other</option></select><input id="stuDate" type="date" required></div><input id="stuRef" placeholder="Transaction ID"><button class="btn green">Save & Receipt</button></form></div>
+<div class="card"><h2>Students</h2><div id="studentsList"></div></div>
+<div class="card"><h2>Receipt</h2><div id="receiptArea" class="receipt">No receipt</div><button class="btn light" onclick="shareW('receiptArea')">Share WhatsApp</button></div>
+</section>
+
+<section id="reports" class="section">
+<div class="card"><h2>📈 Global Reports</h2>
+<p>Sales: <b id="rSales">0</b> | Expenses: <b id="rExpenses">0</b> | Profit: <b id="rProfit">0</b></p>
+<p>Cash: <b id="rCash">0</b> | Airtel: <b id="rAirtel">0</b> | Mpamba: <b id="rMpamba">0</b></p>
+<p>MTN: <b id="rMTN">0</b> | M-Pesa: <b id="rMPesa">0</b> | PayPal: <b id="rPayPal">0</b> | Bank: <b id="rBank">0</b> | Credit: <b id="rCredit">0</b></p>
+<p>School: <b id="rSchool">0</b> | Debts: <b id="rDebts">0</b></p>
+<button class="btn light" onclick="dailyClose()">Daily Closing Report</button><div id="closeArea" class="receipt">No closing</div>
+</div>
+</section>
+
+<section id="settings" class="section">
+<div class="card"><h2>Settings - Sell Worldwide</h2><p class="small">Records Payment Method + Amount + Date + Ref ID for EVERY transaction including STAFF PAYMENTS. Offline. Ready to sell globally.</p>
+<button class="btn" onclick="exportData()">Backup</button><input type="file" id="backupFile"><button class="btn light" onclick="importData()">Restore</button><button class="btn red" onclick="clearData()">Delete All</button></div>
+</section>
+</main>
+<script>
+const KEY='smartmanage_global_final';
+let data={business:'My Business',type:'General Shop',sales:[],stock:[],expenses:[],customers:[],repayments:[],employees:[],salaries:[],students:[],lastReceipt:'',lastInvoice:''};
+function load(){try{const s=localStorage.getItem(KEY);if(s)data={...data,...JSON.parse(s)};}catch{}}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function money(n){return 'MK '+Number(n||0).toLocaleString();}
+function val(id){return document.getElementById(id).value.trim();}
+function num(id){return Number(document.getElementById(id).value);}
+function today(){return new Date().toISOString().slice(0,10);}
+function safe(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function saveBusiness(){data.business=val('businessName')||'My Business';data.type=val('businessType');save();alert('Saved');}
+function openTab(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));document.getElementById('b-'+id).classList.add('active');}
+function addSale(e){e.preventDefault();const total=(num('saleQty')||1)*num('saleAmount');const rec={id:Date.now(),name:val('saleName'),qty:num('saleQty')||1,total,method:val('saleMethod'),ref:val('saleRef'),date:val('saleDate'),customer:val('saleCustomer')};data.sales.push(rec);let f=data.stock.find(s=>s.name.toLowerCase()===val('saleName').toLowerCase());if(f)f.qty=Math.max(0,f.qty-(num('saleQty')||1));data.lastInvoice=`INVOICE - ${data.business}\nDate:${rec.date}\nCustomer:${rec.customer||'Walk-in'}\n${rec.name} x${rec.qty} = ${money(total)}\nPayment:${rec.method} Ref:${rec.ref}\nThank you!`;save();document.getElementById('invoiceArea').textContent=data.lastInvoice;e.target.reset();document.getElementById('saleDate').value=today();}
+function addStock(e){e.preventDefault();let f=data.stock.find(s=>s.name.toLowerCase()===val('productName').toLowerCase());const obj={id:Date.now(),name:val('productName'),qty:num('productQty'),price:num('productPrice'),cost:num('productCost')||0};if(f)Object.assign(f,obj);else data.stock.push(obj);save();e.target.reset();}
+function addExpense(e){e.preventDefault();data.expenses.push({id:Date.now(),name:val('expName'),category:val('expCat'),amount:num('expAmount'),method:val('expMethod'),date:val('expDate')});save();e.target.reset();document.getElementById('expDate').value=today();}
+function addCustomer(e){e.preventDefault();data.customers.push({id:Date.now(),name:val('cusName'),phone:val('cusPhone'),debt:num('cusDebt')});save();e.target.reset();}
+function addRepay(e){e.preventDefault();const c=data.customers.find(x=>String(x.id)===String(val('repayCustomer')));if(c)c.debt=Math.max(0,c.debt-num('repayAmount'));data.repayments.push({id:Date.now(),customerId:val('repayCustomer'),amount:num('repayAmount'),method:val('repayMethod'),date:val('repayDate')});save();e.target.reset();document.getElementById('repayDate').value=today();}
+function addEmp(e){e.preventDefault();data.employees.push({id:Date.now(),name:val('empName'),role:val('empRole'),salary:num('empSalary'),phone:val('empPhone')});save();e.target.reset();}
+function paySal(e){e.preventDefault();const eid=val('payEmployee');const emp=data.employees.find(x=>String(x.id)===String(eid));data.salaries.push({id:Date.now(),employeeId:eid,name:emp?.name||'',amount:num('payAmount'),method:val('payMethod'),ref:val('payRef'),date:val('payDate')});data.expenses.push({id:Date.now()+1,name:'Salary - '+(emp?.name||''),category:'Salaries',amount:num('payAmount'),method:val('payMethod'),date:val('payDate'),ref:val('payRef')});save();e.target.reset();document.getElementById('payDate').value=today();alert('Paid '+val('payMethod')+' - Ref: '+val('payRef'));}
+function addStudent(e){e.preventDefault();const fee=num('stuFee'),paid=num('stuPaid');const rec={id:Date.now(),name:val('stuName'),class:val('stuClass'),fee,paid,balance:fee-paid,method:val('stuMethod'),date:val('stuDate'),ref:val('stuRef')};data.students.push(rec);data.lastReceipt=`SCHOOL RECEIPT - ${data.business}\nDate:${rec.date}\nStudent:${rec.name} Class:${rec.class}\nDue:${money(fee)} Paid:${money(paid)} via ${rec.method}\nRef:${rec.ref} Balance:${money(rec.balance)}\nSignature:______`;save();document.getElementById('receiptArea').textContent=data.lastReceipt;e.target.reset();document.getElementById('stuDate').value=today();}
+function removeItem(g,id){if(!confirm('Delete?'))return;data[g]=data[g].filter(x=>String(x.id)!==String(id));save();}
+function shareW(id){window.open('https://wa.me/?text='+encodeURIComponent(document.getElementById(id).textContent),'_blank');}
+function dailyClose(){const d=today();const s=data.sales.filter(x=>x.date===d).reduce((a,b)=>a+b.total,0);const ex=data.expenses.filter(x=>x.date===d).reduce((a,b)=>a+b.amount,0);document.getElementById('closeArea').textContent=`DAILY CLOSING - ${data.business} - ${d}\nSales:${money(s)}\nExpenses:${money(ex)}\nProfit:${money(s-ex)}`; }
+function render(){document.getElementById('businessLabel').textContent=data.business;document.getElementById('businessName').value=data.business;
+const sSum=data.sales.reduce((a,b)=>a+b.total,0);const eSum=data.expenses.reduce((a,b)=>a+b.amount,0);
+document.getElementById('dSales').textContent=money(sSum);document.getElementById('dExpenses').textContent=money(eSum);document.getElementById('dProfit').textContent=money(sSum-eSum);
+document.getElementById('dDebts').textContent=money(data.customers.reduce((a,b)=>a+b.debt,0));document.getElementById('dSchool').textContent=money(data.students.reduce((a,b)=>a+b.paid,0));
+document.getElementById('dStock').textContent=data.stock.reduce((a,b)=>a+b.qty,0);document.getElementById('dLow').textContent=data.stock.filter(x=>x.qty<=5).length;
+document.getElementById('dStaff').textContent=money(data.employees.reduce((a,b)=>a+b.salary,0)-data.salaries.reduce((a,b)=>a+b.amount,0));
+document.getElementById('repayCustomer').innerHTML='<option>Select</option>'+data.customers.map(c=>`<option value="${c.id}">${safe(c.name)} - ${money(c.debt)}</option>`).join('');
+document.getElementById('payEmployee').innerHTML='<option>Select Staff</option>'+data.employees.map(e=>`<option value="${e.id}">${safe(e.name)}</option>`).join('');
+document.getElementById('alerts').innerHTML=[...data.stock.filter(x=>x.qty<=5).map(x=>`⚠️ Low ${x.name} (${x.qty})`),...data.customers.filter(x=>x.debt>0).map(x=>`💰 Debt ${x.name} ${money(x.debt)}`),...data.students.filter(x=>x.balance>0).map(x=>`🏫 Fees ${x.name} ${money(x.balance)}`)].map(a=>`<div class="item">${safe(a)}</div>`).join('')||'All OK ✅';
+document.getElementById('salesList').innerHTML=data.sales.slice().reverse().map(x=>`<div class="item">${safe(x.name)} x${x.qty}=${money(x.total)} [${safe(x.method)}] Ref:${safe(x.ref)} <button onclick="removeItem('sales','${x.id}')">Del</button></div>`).join('')||'None';
+document.getElementById('stockList').innerHTML=data.stock.map(s=>`<div class="item">${safe(s.name)} Qty:${s.qty} Sell:${money(s.price)} Cost:${money(s.cost)} Profit:${money(s.price-s.cost)} ${s.qty<=5?'LOW':''} <button onclick="removeItem('stock','${s.id}')">Del</button></div>`).join('')||'None';
+document.getElementById('expensesList').innerHTML=data.expenses.slice().reverse().map(x=>`<div class="item">${safe(x.name)} [${safe(x.category)}] ${money(x.amount)} ${safe(x.method)} <button onclick="removeItem('expenses','${x.id}')">Del</button></div>`).join('')||'None';
+document.getElementById('customersList').innerHTML=data.customers.map(c=>`<div class="item">${safe(c.name)} Debt:${money(c.debt)} <button onclick="removeItem('customers','${c.id}')">Del</button></div>`).join('')||'None';
+document.getElementById('employeesList').innerHTML=data.employees.map(e=>`<div class="item">${safe(e.name)} ${safe(e.role)} Salary:${money(e.salary)} <button onclick="removeItem('employees','${e.id}')">Del</button></div>`).join('')||'None';
+document.getElementById('salaryList').innerHTML=data.salaries.slice().reverse().map(s=>`<div class="item">${safe(s.name)} ${money(s.amount)} via ${safe(s.method)} Ref:${safe(s.ref)} ${safe(s.date)} <button onclick="removeItem('salaries','${s.id}')">Del</button></div>`).join('')||'None';
+document.getElementById('studentsList').innerHTML=data.students.map(s=>`<div class="item">${safe(s.name)} ${safe(s.class)} Due:${money(s.fee)} Paid:${money(s.paid)} Bal:${money(s.balance)} ${safe(s.method)} <button onclick="removeItem('students','${s.id}')">Del</button></div>`).join('')||'None';
+if(data.lastReceipt)document.getElementById('receiptArea').textContent=data.lastReceipt;if(data.lastInvoice)document.getElementById('invoiceArea').textContent=data.lastInvoice;
+const sumM=m=>data.sales.filter(x=>x.method===m).reduce((a,b)=>a+b.total,0);
+document.getElementById('rSales').textContent=money(sSum);document.getElementById('rExpenses').textContent=money(eSum);document.getElementById('rProfit').textContent=money(sSum-eSum);
+document.getElementById('rCash').textContent=money(sumM('Cash'));document.getElementById('rAirtel').textContent=money(sumM('Airtel Money'));document.getElementById('rMpamba').textContent=money(sumM('TNM Mpamba'));document.getElementById('rMTN').textContent=money(sumM('MTN Mobile Money'));document.getElementById('rMPesa').textContent=money(sumM('M-Pesa'));document.getElementById('rPayPal').textContent=money(sumM('PayPal'));document.getElementById('rBank').textContent=money(sumM('Bank Transfer'));document.getElementById('rCredit').textContent=money(sumM('Credit / Unpaid'));document.getElementById('rSchool').textContent=money(data.students.reduce((a,b)=>a+b.paid,0));document.getElementById('rDebts').textContent=money(data.customers.reduce((a,b)=>a+b.debt,0));
+}
+function exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='backup.json';a.click();}
+function importData(){const f=document.getElementById('backupFile').files[0];if(!f)return alert('Choose');const r=new FileReader();r.onload=e=>{data={...data,...JSON.parse(e.target.result)};save();alert('Restored');};r.readAsText(f);}
+function clearData(){if(confirm('Delete ALL?')){localStorage.removeItem(KEY);data={business:'My Business',type:'General Shop',sales:[],stock:[],expenses:[],customers:[],repayments:[],employees:[],salaries:[],students:[],lastReceipt:'',lastInvoice:''};render();}}
+load();['saleDate','expDate','repayDate','payDate','stuDate'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today();});render();
+</script></body></html>

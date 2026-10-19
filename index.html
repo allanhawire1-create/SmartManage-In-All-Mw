@@ -1,0 +1,28 @@
+<!-- TOP PART - LOCK SCREEN WITH PROOF -->
+<div id="lockScreen">
+<div class="lockBox">
+<h2>🔒 SmartManage PRO</h2>
+<p class="small">Owned by Mkandawire Allan - MK 10,000 / 3 months</p>
+<div style="display:flex;gap:5px">
+<button class="btn light" style="flex:1" onclick="showLockTab('key')">Enter Key</button>
+<button class="btn light" style="flex:1" onclick="showLockTab('proof')">Upload Proof</button>
+</div>
+
+<div id="lockKeyTab">
+<input id="licenseInput" placeholder="License Key e.g. MW-SHOP-001">
+<button class="btn green" onclick="checkLicense()">Unlock</button>
+<p id="licenseMsg" class="small" style="color:red"></p>
+</div>
+
+<div id="lockProofTab" style="display:none;text-align:left">
+<p class="small"><b>Step 1:</b> Send MK 10,000 to<br><b>TNM Mpamba: +265890840266<br>Name: Tivwale Ng'oma</b></p>
+<input id="proofPhone" placeholder="Your Phone Number">
+<input id="proofTx" placeholder="Transaction ID from Mpamba SMS">
+<input id="proofName" placeholder="Your Business Name">
+<button class="btn green" onclick="submitProof()">Submit Proof & Get 24hr Access</button>
+<p id="proofMsg" class="small"></p>
+</div>
+
+<p class="small" style="margin-top:10px">Price: MK 10,000 per 3 months<br>WhatsApp: +265890840266<br>Demo: DEMO-MW-2026</p>
+</div>
+</div>
